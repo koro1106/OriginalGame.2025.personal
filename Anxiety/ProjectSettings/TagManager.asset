@@ -6,19 +6,21 @@ TagManager:
   tags:
   - Ground
   - platform
+  - Item
+  - Anxiety
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Ground
   - Water
   - UI
-  - Ground
   - Player
-  - 
-  - 
-  - 
+  - PostProcess
   - BackGround
+  - 
+  - 
+  - 
   - 
   - 
   - 
