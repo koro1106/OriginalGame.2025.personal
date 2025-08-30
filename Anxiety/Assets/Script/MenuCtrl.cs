@@ -4,6 +4,7 @@ public class MenuCtrl : MonoBehaviour
 {
     public bool isMenuOpne;
     public GameObject menuObject;
+    public GameObject inventoryObject;
     public GameObject settingObject;
     public GameObject userGuideObject;
 

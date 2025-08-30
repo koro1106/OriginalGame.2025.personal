@@ -9,10 +9,11 @@ public class PlayerCtrl : MonoBehaviour
 
     [SerializeField] public float holdIntensity = 0.25f; 
     [SerializeField] public float nomalIntensity = 1f; 
-    [SerializeField] public float duration = 0.5f; 
+    [SerializeField] public float duration = 0.5f;
 
     public Animator animator;
     private Rigidbody2D rb;
+    private GameObject holdObj;
     private bool isRight = false;
     private bool isJumping = false;
     private bool isGround = true;
@@ -20,7 +21,6 @@ public class PlayerCtrl : MonoBehaviour
 
     private float dir = 1f;
     private float rayDistans = 0.2f;
-    private GameObject holdObj;
     RaycastHit2D hit;
     private VignetteCtrl vignette;
     private ColorCtrl color;
@@ -65,9 +65,15 @@ public class PlayerCtrl : MonoBehaviour
                     Move();
                     break;
                 case 2:
-                    Move();
+                    rb.velocity = Vector2.zero;
+                    animator.SetInteger("Speed", 0);
                     break;
                 case 3:
+                    Move();
+                    if (Input.GetKeyDown(KeyCode.K)) Hold();
+                    if (Input.GetKeyDown(KeyCode.Space)) Jump();
+                    break;
+                case 4:
                     rb.velocity = Vector2.zero;
                     animator.SetInteger("Speed", 0);
                     break;
@@ -77,10 +83,7 @@ public class PlayerCtrl : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space) && !isJumping && !isHold)
             {
-                rb.velocity += new Vector2(0, jumpForce);
-                animator.SetBool("IsJump", true);
-                isJumping = true;
-                isGround = false;
+                Jump();
             }
 
             if (Input.GetKeyDown(KeyCode.K))
@@ -107,9 +110,18 @@ public class PlayerCtrl : MonoBehaviour
             currentVignetteValue = target;
             vignette.FadeVignetteIntensity(target, duration);
         }
-        speed = isHold ? 50f : 10f; 
+        //speed = isHold ? 50f : 10f; 
+        speed = 50f;
     }
 
+  
+    void Jump()
+    {
+        rb.velocity += new Vector2(0, jumpForce);
+        animator.SetBool("IsJump", true);
+        isJumping = true;
+        isGround = false;
+    }
     void Move()
     {
         float horizontal = Input.GetAxisRaw("Horizontal");
@@ -136,15 +148,16 @@ public class PlayerCtrl : MonoBehaviour
         {
             rb.velocity = new Vector2(0, rb.velocity.y);
         }
-       // rb.drag = isGround ? groundDrag : airDrag;
     }
 
     private void Hold()
     {
-        if (holdObj == null)
-        {
-            hit = Physics2D.Raycast(rayPoint.position, transform.right, rayDistans);
-            if (hit.collider != null && hit.collider.tag == "Anxiety")
+        hit = Physics2D.Raycast(rayPoint.position, Vector2.right * dir, rayDistans);
+            
+         if (hit.collider != null)
+         {
+          // Debug.Log("Ray hit: " + hit.collider.offset);
+            if (hit.collider.CompareTag("Anxiety"))
             {
                 isHold = true;
                 holdObj = hit.collider.gameObject;
@@ -154,15 +167,18 @@ public class PlayerCtrl : MonoBehaviour
                 holdObj.transform.position = holdPoint.position;
                 holdObj.transform.SetParent(transform);
             }
-        }
+         }
         else
         {
             isHold = false;
             animator.SetBool("IsHold", false);
 
-            holdObj.GetComponent<Rigidbody2D>().isKinematic = false;
-            holdObj.transform.SetParent(null);
-            holdObj = null;
+            if(holdObj != null)
+            {
+                holdObj.GetComponent<Rigidbody2D>().isKinematic = false;
+                holdObj.transform.SetParent(null);
+                holdObj = null;
+            }
         }
     }
     void ChangeDirection()
